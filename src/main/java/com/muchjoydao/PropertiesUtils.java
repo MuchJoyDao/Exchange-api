@@ -4,8 +4,7 @@ import cn.hutool.core.lang.Console;
 import cn.hutool.core.util.StrUtil;
 
 import java.io.*;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.*;
 
 public class PropertiesUtils {
     /**
@@ -64,5 +63,43 @@ public class PropertiesUtils {
         } catch (IOException ignored) {
         }
         return properties;
+    }
+    /**
+     * 获取配置文件中的数组
+     * @param key 数组对应的键
+     * @param separator 分隔符
+     * @return 数组
+     */
+    public static String[] getArray( String key, String separator) {
+        if (properties == null) {
+            properties = loadConfProperties();
+        }
+        String value = properties.getProperty(key);
+        if (value != null) {
+            String[] vs=value.split(separator);
+            for (String address:vs){
+                Console.log("从配置文件读取参数[{}] -> {}", key, address);
+            }
+            return vs;
+        }
+        return null;
+    }
+
+    /**
+     * 获取配置文件中的列表
+     * @param key 列表对应的键
+     * @param separator 分隔符
+     * @return 列表
+     */
+    public static List<String> getList(String key, String separator) {
+        if (properties == null) {
+            properties = loadConfProperties();
+        }
+        String value = properties.getProperty(key);
+        if (value != null) {
+            String[] array = value.split(separator);
+            return new ArrayList<>(Arrays.asList(array));
+        }
+        return null;
     }
 }
