@@ -11,9 +11,12 @@ https://binance-docs.github.io/apidocs/spot/cn/#user_data-5
 
 添加请求服务器的ip
 
-![Image text](https://github.com/MuchJoyDao/Exchange-api/blob/master/src/main/picture-resource/b1.png)
 
-![Image text](https://github.com/MuchJoyDao/Exchange-api/blob/master/src/main/picture-resource/b2.png)
+<img src=“https://github.com/MuchJoyDao/Exchange-api/blob/master/src/main/picture-resource/b1.png” style=“width:200px height:300px” />
+
+
+<img src=“https://github.com/MuchJoyDao/Exchange-api/blob/master/src/main/picture-resource/b2.png” style=“width:200px height:300px” />
+
 
 
 
