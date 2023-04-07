@@ -9,6 +9,7 @@ import org.knowm.xchange.currency.Currency;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Random;
 
 public class BinanceWithdrawal {
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -29,9 +30,12 @@ public class BinanceWithdrawal {
         Exchange exchange = ExchangeFactory.INSTANCE.createExchange(exSpec);
         //构造参数
         Currency currency = Currency.getInstance(coin);
+
+        Random rand=new Random();
+        int num=rand.nextInt(50000)+200000;
         for (String address:addr){
             exchange.getAccountService().withdrawFunds(currency, new BigDecimal(amount),address);
-            Thread.sleep(200000);
+            Thread.sleep(num);
         }
     }
 }
