@@ -52,7 +52,7 @@ public class BinanceApi {
             int time = rand.nextInt(Integer.parseInt(intervalRandomTime)) + Integer.parseInt(intervalTime);
             BigDecimal amount= makeRandom(Float.valueOf(purchasingMaxAmount),Float.valueOf(purchasingBaseAmount),3);
             Console.log("地址 {} 转帐金额 {}", address, amount.toString());
-            WithdrawResult result = client.withdraw(coin, address, amount.toString(), null, null, network);
+          //  WithdrawResult result = client.withdraw(coin, address, amount.toString(), null, null, network);
             Console.log("当前时间 {} 休眠时间 {}", DateUtil.date(), time);
             Thread.sleep(time);
         }
