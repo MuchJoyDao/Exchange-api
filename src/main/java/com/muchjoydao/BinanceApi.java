@@ -45,18 +45,50 @@ public class BinanceApi {
         }
         //同步
         BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(apiKey, secretKey);
+        //syncRestClient(addr,factory,intervalRandomTime,intervalTime,purchasingMaxAmount,purchasingBaseAmount,coin,network);
+
+        asyncRestClient(addr,factory,intervalRandomTime,intervalTime,purchasingMaxAmount,purchasingBaseAmount,coin,network);
+
+
+
+    }
+
+    private static  void syncRestClient(String[] addrs,BinanceApiClientFactory factory,String intervalRandomTime,String intervalTime,String purchasingMaxAmount,String purchasingBaseAmount,String coin,String network){
         BinanceApiRestClient client = factory.newRestClient();
         // Withdraw 接口现有的必须参数 如果不够改项目源码，如本接口加了网络network
         Random rand = new Random();
-        for (String address : addr) {
+        for (String address : addrs) {
             int time = rand.nextInt(Integer.parseInt(intervalRandomTime)) + Integer.parseInt(intervalTime);
             BigDecimal amount= makeRandom(Float.valueOf(purchasingMaxAmount),Float.valueOf(purchasingBaseAmount),3);
             Console.log("地址 {} 转帐金额 {}", address, amount.toString());
-          //  WithdrawResult result = client.withdraw(coin, address, amount.toString(), null, null, network);
+           // WithdrawResult result = client.withdraw(coin, address, amount.toString(), null, null, network);
             Console.log("当前时间 {} 休眠时间 {}", DateUtil.date(), time);
-            Thread.sleep(time);
+            try {
+                Thread.sleep(time);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+    }
 
+    private static  void asyncRestClient(String[] addrs,BinanceApiClientFactory factory,String intervalRandomTime,String intervalTime,String purchasingMaxAmount,String purchasingBaseAmount,String coin,String network){
+        BinanceApiAsyncRestClient client = factory.newAsyncRestClient();
+        // Withdraw 接口现有的必须参数 如果不够改项目源码，如本接口加了网络network
+        Random rand = new Random();
+        for (int i=0;i< addrs.length;i++) {
+            int time = rand.nextInt(Integer.parseInt(intervalRandomTime)) + Integer.parseInt(intervalTime);
+            BigDecimal amount= makeRandom(Float.valueOf(purchasingMaxAmount),Float.valueOf(purchasingBaseAmount),3);
+            Console.log("地址 {} 转帐金额 {}", addrs[i], amount.toString());
+            client.withdraw(coin,  addrs[i], amount.toString(), null, null, network, response -> {});
+            Console.log("当前时间 {} 休眠时间 {}", DateUtil.date(), time);
+            try {
+                if (i<addrs.length){
+                    Thread.sleep(time);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private static BigDecimal makeRandom(float max, float min, int scale) {
