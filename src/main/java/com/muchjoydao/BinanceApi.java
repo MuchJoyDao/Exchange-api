@@ -11,8 +11,7 @@ import com.binance.api.client.domain.account.WithdrawResult;
 import com.muchjoydao.model.KeyValue;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BinanceApi {
@@ -31,16 +30,17 @@ public class BinanceApi {
         String intervalRandomTime = PropertiesUtils.getValue("binance.intervalRandomTime");
 
         //读取地址
-        String[] addr;
+        List<String> addr;
         String fileName = PropertiesUtils.getValue("binance.address");
         if (fileName.contains(".xlsx")) {
             List<KeyValue> list = EasyExcel.read(fileName).head(KeyValue.class).sheet().doReadSync();
-            addr = list.stream().map(KeyValue::getAddress).filter(x -> x != null).collect(Collectors.toList()).stream().toArray(String[]::new);
+            addr = Collections.synchronizedList(list.stream().map(KeyValue::getAddress).filter(x -> x != null).collect(Collectors.toList()));
         } else {
-            addr = PropertiesUtils.getArray("binance.address", ",");
+           String[]  params = PropertiesUtils.getArray("binance.address", ",");
+           addr= Collections.synchronizedList(Arrays.asList(params));
         }
 
-        if (StrUtil.hasBlank(apiKey, secretKey, coin, purchasingBaseAmount, purchasingMaxAmount, intervalRandomTime, intervalTime, addr[0])) {
+        if (StrUtil.hasBlank(apiKey, secretKey, coin, purchasingBaseAmount, purchasingMaxAmount, intervalRandomTime, intervalTime, addr.get(0))) {
             throw new RuntimeException("币安配置信息错误");
         }
         //同步
@@ -53,7 +53,7 @@ public class BinanceApi {
 
     }
 
-    private static  void syncRestClient(String[] addrs,BinanceApiClientFactory factory,String intervalRandomTime,String intervalTime,String purchasingMaxAmount,String purchasingBaseAmount,String coin,String network){
+    private static  void syncRestClient(List<String> addrs,BinanceApiClientFactory factory,String intervalRandomTime,String intervalTime,String purchasingMaxAmount,String purchasingBaseAmount,String coin,String network){
         BinanceApiRestClient client = factory.newRestClient();
         // Withdraw 接口现有的必须参数 如果不够改项目源码，如本接口加了网络network
         Random rand = new Random();
@@ -61,7 +61,7 @@ public class BinanceApi {
             int time = rand.nextInt(Integer.parseInt(intervalRandomTime)) + Integer.parseInt(intervalTime);
             BigDecimal amount= makeRandom(Float.valueOf(purchasingMaxAmount),Float.valueOf(purchasingBaseAmount),3);
             Console.log("地址 {} 转帐金额 {}", address, amount.toString());
-           // WithdrawResult result = client.withdraw(coin, address, amount.toString(), null, null, network);
+            WithdrawResult result = client.withdraw(coin, address, amount.toString(), null, null, network);
             Console.log("当前时间 {} 休眠时间 {}", DateUtil.date(), time);
             try {
                 Thread.sleep(time);
@@ -71,18 +71,18 @@ public class BinanceApi {
         }
     }
 
-    private static  void asyncRestClient(String[] addrs,BinanceApiClientFactory factory,String intervalRandomTime,String intervalTime,String purchasingMaxAmount,String purchasingBaseAmount,String coin,String network){
+    private static  void asyncRestClient(List<String> addrs,BinanceApiClientFactory factory,String intervalRandomTime,String intervalTime,String purchasingMaxAmount,String purchasingBaseAmount,String coin,String network){
         BinanceApiAsyncRestClient client = factory.newAsyncRestClient();
         // Withdraw 接口现有的必须参数 如果不够改项目源码，如本接口加了网络network
         Random rand = new Random();
-        for (int i=0;i< addrs.length;i++) {
+        for (int i=0;i< addrs.size();i++) {
             int time = rand.nextInt(Integer.parseInt(intervalRandomTime)) + Integer.parseInt(intervalTime);
             BigDecimal amount= makeRandom(Float.valueOf(purchasingMaxAmount),Float.valueOf(purchasingBaseAmount),3);
-            Console.log("地址 {} 转帐金额 {}", addrs[i], amount.toString());
-            client.withdraw(coin,  addrs[i], amount.toString(), null, null, network, response -> {});
+            Console.log("地址 {} 转帐金额 {}", addrs.get(i), amount.toString());
+        //    client.withdraw(coin,   addrs.get(i), amount.toString(), null, null, network, response -> {});
             Console.log("当前时间 {} 休眠时间 {}", DateUtil.date(), time);
             try {
-                if (i<addrs.length){
+                if (i<addrs.size()){
                     Thread.sleep(time);
                 }
             } catch (InterruptedException e) {
